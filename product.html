@@ -19,14 +19,14 @@
     #toast.show { opacity:1; transform: translateY(0); }
 
     .controls { display:flex; gap:12px; justify-content:center; align-items:center; margin-bottom:20px; flex-wrap:wrap; }
-    .wa-btn { background:#25D366; color:white; padding:8px 10px; border-radius:8px; display:flex; align-items:center;justify-content: center; gap:8px; text-decoration:none; font-weight:600; }
+    .wa-btn { background:#1d6738; color:white; padding:8px 10px; border-radius:8px; display:flex; align-items:center;justify-content: center; gap:8px; text-decoration:none; font-weight:600; }
     .wa-icon { width:18px; height:18px; }
   </style>
 </head>
 <body class="p-4">
   <div class="text-center mb-6">
-    <h1 class="text-3xl font-semibold text-gray-800">🛍️ Our Products</h1>
-    <p class="text-gray-500 mt-1">Browse products — filter by maximum price</p>
+    <h1 class="text-3xl font-semibold text-gray-800">👜Lumora</h1>
+    <p class="text-gray-500 mt-1">Browse Quality Products — filter by maximum price</p>
   </div>
 
   <!-- Controls -->
@@ -130,13 +130,13 @@
     }
 
     function createCard(prod) {
-      const name = prod.productName || "Unnamed Product";
+      const name = prod.productName || "Ladies Purses";
       const price = Number(prod.price || 0);
       const discountPrice = Number(prod.discountPrice ?? price);
       const image = prod.image || "https://via.placeholder.com/400x300?text=No+Image";
 
-      const waNumber = "919824917935";
-      const msg = encodeURIComponent(`Hello, I'm interested in "${name}" priced at ₹${formatNumber(discountPrice)}.`);
+      const waNumber = "918347564798";
+      const msg = encodeURIComponent(`Hello, I'm interested in *${name}* priced at ₹${formatNumber(discountPrice)}.`);
       const waUrl = `https://wa.me/${waNumber}?text=${msg}`;
 
       const div = document.createElement('div');
@@ -148,7 +148,7 @@
           <h2 class="font-semibold text-gray-800 text-lg">${escapeHtml(name)}</h2>
           <div class="mt-2">
             <p class="text-gray-400 line-through text-sm">₹${formatNumber(price)}</p>
-            <p class="text-green-600 text-xl font-bold">₹${formatNumber(discountPrice)}</p>
+            <p style="color:#1d6738;"class="text-green-600 text-xl font-bold">₹${formatNumber(discountPrice)}</p>
           </div>
         </div>
         <a class="wa-btn mt-3" href="${waUrl}" target="_blank" rel="noopener">

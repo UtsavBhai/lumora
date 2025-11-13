@@ -7,7 +7,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body { background: #f9fafb; font-family: 'Poppins', sans-serif; }
-    .product-card { transition: transform .2s ease, box-shadow .2s ease; }
+    .product-card { transition: transform .2s ease, box-shadow .2s ease;border: 1px solid black; }
     .product-card:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0,0,0,.1); }
     img { object-fit: contain; width: 100%; height: 200px; border-radius: .5rem; background: #fff; }
     .loader { display:flex; justify-content:center; align-items:center; padding:20px; }
@@ -53,7 +53,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
     import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-database.js";
 
-    // Firebase config (your project)
+    // Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyCrROgrBCOLY5x5hT-gKeGHNxgkceDsHEY",
       authDomain: "bizcard-66p40.firebaseapp.com",
@@ -69,8 +69,8 @@
     const db = getDatabase(app);
 
     // State
-    let products = [];           // all items from Firebase
-    let filteredProducts = [];   // current view (after filter)
+    let products = [];
+    let filteredProducts = [];
     let displayedCount = 0;
     const itemsPerPage = 5;
     let isFetching = false;
@@ -89,12 +89,13 @@
       try {
         const snap = await get(ref(db, "products"));
         if (snap.exists()) {
-          // keep original data order — convert to array
           products = Object.values(snap.val());
+
+          // ✅ NEW: Show newest products first (reverse order)
+          products.reverse();
         } else {
           products = [];
         }
-        // default: show all
         filteredProducts = [...products];
         resetDisplayAndShowNext();
       } catch (err) {
@@ -105,17 +106,14 @@
       }
     }
 
-    // Show/hide loader
     function showLoader(on) { loader.classList.toggle('hidden', !on); }
 
-    // Reset UI and show first batch
     function resetDisplayAndShowNext() {
       productList.innerHTML = "";
       displayedCount = 0;
       showNextProducts();
     }
 
-    // Show next batch from filteredProducts
     function showNextProducts() {
       if (isFetching) return;
       isFetching = true;
@@ -126,20 +124,17 @@
       displayedCount = end;
       isFetching = false;
 
-      // if nothing to show
       if (filteredProducts.length === 0) {
         productList.innerHTML = `<p class='text-center text-gray-500 col-span-full'>No products found.</p>`;
       }
     }
 
-    // Create product card with WhatsApp button
     function createCard(prod) {
       const name = prod.productName || "Unnamed Product";
       const price = Number(prod.price || 0);
       const discountPrice = Number(prod.discountPrice ?? price);
       const image = prod.image || "https://via.placeholder.com/400x300?text=No+Image";
 
-      // prepare whatsapp message (number 9824917935 -> wa.me needs country code)
       const waNumber = "919824917935";
       const msg = encodeURIComponent(`Hello, I'm interested in "${name}" priced at ₹${formatNumber(discountPrice)}.`);
       const waUrl = `https://wa.me/${waNumber}?text=${msg}`;
@@ -173,7 +168,6 @@
     function formatNumber(n){ return Number(n).toLocaleString('en-IN'); }
     function escapeHtml(str){ return String(str).replace(/[&<>"']/g, (m)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[m])); }
 
-    // Apply max-only filter
     function applyFilter() {
       const raw = maxInput.value.trim();
       if (!raw) {
@@ -186,7 +180,6 @@
         return;
       }
 
-      // filter using discountPrice if present otherwise price
       filteredProducts = products.filter(p => {
         const effective = Number(p.discountPrice ?? p.price ?? 0);
         return effective <= max;
@@ -195,14 +188,12 @@
       resetDisplayAndShowNext();
     }
 
-    // Reset filter
     function resetFilter() {
       maxInput.value = "";
       filteredProducts = [...products];
       resetDisplayAndShowNext();
     }
 
-    // infinite scroll on filteredProducts
     window.addEventListener('scroll', () => {
       if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 120) {
         if (displayedCount < filteredProducts.length) {
@@ -215,12 +206,10 @@
       }
     });
 
-    // events
     filterBtn.addEventListener('click', applyFilter);
     resetBtn.addEventListener('click', resetFilter);
     maxInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') applyFilter(); });
 
-    // initial
     fetchProducts();
   </script>
 </body>

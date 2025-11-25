@@ -1,215 +1,1521 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Product Gallery</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    body { background: #f9fafb; font-family: 'Poppins', sans-serif; }
-    .product-card { transition: transform .2s ease, box-shadow .2s ease; }
-    .product-card:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0,0,0,.1); }
-    img { object-fit: contain; width: 100%; height: 200px; border-radius: .5rem; background: #fff; }
-    .loader { display:flex; justify-content:center; align-items:center; padding:20px; }
-    .spinner { border:4px solid #e5e7eb; border-top:4px solid #3b82f6; border-radius:50%; width:40px; height:40px; animation: spin 1s linear infinite; }
-    @keyframes spin { 0%{transform:rotate(0)} 100%{transform:rotate(360deg)} }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>String Art Portrait</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"/>
+<style>
+* { box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+body { margin: 0; background: #fff; color: #333; }
+:root { --theme-color: #254262; }
 
-    /* toast */
-    #toast { position: fixed; top: 20px; right: 20px; background: #ef4444; color: #fff; padding: 10px 14px; border-radius:8px; box-shadow:0 2px 10px rgba(0,0,0,.15); opacity:0; transform: translateY(-10px); transition: all .28s ease; z-index:1000;}
-    #toast.show { opacity:1; transform: translateY(0); }
+/* OFFER HEADER */
+.offer-header {
+  background: var(--theme-color);
+  color: #fff;
+  text-align: center;
+  padding: 10px 15px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  transition: all 0.5s ease;
+}
 
-    .controls { display:flex; gap:12px; justify-content:center; align-items:center; margin-bottom:20px; flex-wrap:wrap; }
-    .wa-btn { background:#1d6738; color:white; padding:8px 10px; border-radius:8px; display:flex; align-items:center;justify-content: center; gap:8px; text-decoration:none; font-weight:600; }
-    .wa-icon { width:18px; height:18px; }
-  </style>
+/* PAGE LAYOUT */
+.container { display: flex; max-width: 1200px; margin: 20px auto; gap: 20px; padding: 0 15px; }
+/* Container for the whole image section */
+.image-section { 
+  flex: 1; 
+  display: flex; 
+  gap: 10px; 
+}
+
+/* Thumbnails container */
+.thumbnails { 
+  display: flex;
+  flex-direction: column; 
+  gap: 10px; 
+}
+
+/* Thumbnails images */
+.thumbnails img { 
+  width: 60px; 
+  height: 60px; 
+  object-fit: cover; 
+  border: 2px solid #eee; 
+  cursor: pointer; 
+  transition: 0.3s; 
+  border-radius: 5px; 
+}
+
+/* Active or hover thumbnails */
+.thumbnails img.active, .thumbnails img:hover { 
+  border-color: var(--theme-color, #4a6fa5); 
+}
+
+/* Main image container */
+.main-image { 
+  flex: 1; 
+  display: flex; 
+  align-items: flex-start; /* vertically center the image */
+  justify-content: center; 
+  background: #f9f9f9; 
+  border-radius: 10px; 
+  position: relative;
+ //* padding: 10px;*/
+}
+
+/* Main product image */
+.main-image img { 
+  width: 100%; 
+  max-width: 500px; 
+  border-radius: 10px; 
+  object-fit: contain;
+}
+
+/* Prev & Next buttons */
+.main-image button {
+  position: absolute;
+  top: 50%; /* vertically center */
+  transform: translateY(-50%);
+  background: transparent; /* transparent buttons */
+  border: none;
+  color: white;
+  font-size: 2.5rem; /* arrow size */
+  cursor: pointer;
+  user-select: none;
+  padding: 0 10px;
+  transition: color 0.3s;
+}
+
+/* Positioning */
+.main-image .prev { left: 0; }
+.main-image .next { right: 0; }
+
+/* Hover effect for buttons */
+.main-image button:hover {
+  color: var(--theme-color, #4a6fa5); /* change color on hover */
+}
+
+/* Optional: Responsive adjustments */
+@media screen and (max-width: 768px) {
+  .thumbnails img { width: 50px; height: 50px; }
+  .main-image img { max-width: 350px; }
+  .main-image button { font-size: 2rem; }
+}
+
+@media screen and (max-width: 480px) {
+  .image-section { flex-direction: column; }
+  .thumbnails { flex-direction: row; justify-content: center; gap: 5px; margin-bottom: 10px; }
+  .thumbnails img { width: 40px; height: 40px; }
+  .main-image img { max-width: 100%; }
+  .main-image button { font-size: 1.8rem; padding: 0 5px; }
+}
+
+.details-section { flex: 1; }
+.product-title { font-size: 1.8rem; font-weight: 600; margin-bottom: 10px; color: var(--theme-color); }
+.rating { color: #f5a623; font-size: 1rem; margin-bottom: 10px; }
+.price { font-size: 1.5rem; font-weight: bold; margin-bottom: 10px; color: var(--theme-color); }
+.old-price { text-decoration: line-through; color: #888; font-size: 1rem; margin-left: 10px; }
+.discount { color: green; font-weight: 600; margin-left: 5px; }
+.option-group { margin: 20px 0; }
+.option-title { font-weight: 600; margin-bottom: 8px; }
+.image-type-options button, .size-options button { padding: 10px 15px; border: 2px solid #ccc; background: #fff; margin-right: 10px; border-radius: 8px; cursor: pointer; transition: 0.3s; }
+.image-type-options button.active, .size-options button.active { background:#c6cfdc; color: var(--theme-color); }
+.actions { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+.actions button { padding: 15px; font-size: 1rem; font-weight: 600; border: none; cursor: pointer; border-radius: 8px; }
+.personalize-btn { background: var(--theme-color); color: #fff; }
+.extra-info { margin-top: 30px; }
+.extra-info h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 5px; color: var(--theme-color); cursor: pointer; padding: 8px 0; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+.extra-info p { font-size: 0.95rem; color: #555; margin: 0; padding: 0 0 10px 0; display: none; }
+.extra-info h3::after { content: "+"; font-weight: bold; }
+.extra-info h3.active::after { content: "−"; }
+
+/* FEATURES */
+.feature-badges {
+  display: flex;
+  gap: 15px;
+  margin: 20px 0;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
+.feature-badges .feature {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f5f5f5;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  color: #333;
+  flex: 1 1 auto;
+  min-width: 150px;
+}
+.feature-badges .feature img { width: 24px; height: 24px; }
+
+/* CUSTOM CALENDAR */
+.custom-calendar {
+  width: 100%;
+  max-width: 300px;
+  background: #fff;
+  border: 2px solid #ccc;
+  border-radius: 10px;
+  padding: 10px;
+  font-family: 'Poppins', sans-serif;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  margin-top: 5px;
+  display: none; /* hidden by default */
+}
+.custom-calendar .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.custom-calendar .calendar-header button { background: var(--theme-color); color: #fff; border: none; padding: 5px 10px; border-radius: 6px; cursor: pointer; }
+.custom-calendar .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+.custom-calendar .day { padding: 10px 0; text-align: center; border-radius: 6px; cursor: pointer; transition: 0.3s; }
+.custom-calendar .day:hover { background: var(--theme-color); color: #fff; }
+.custom-calendar .day.disabled { cursor: not-allowed; color: #ccc; }
+.custom-calendar .day.selected { background: #f2a33c; color: #fff; font-weight: 600; }
+
+/* RESPONSIVE */
+@media (max-width: 992px) {
+  .container { flex-direction: column; align-items: center; }
+  .image-section { flex-direction: column; align-items: center; }
+  .thumbnails { flex-direction: row; order: 2; }
+  .thumbnails img { width: 50px; height: 50px; }
+  .main-image img { max-width: 100%; }
+  .details-section { width: 100%; }
+  .feature-badges { justify-content: center; }
+}
+@media (max-width: 600px) {
+  .product-title { font-size: 1.4rem; }
+  .price { font-size: 1.2rem; }
+  .actions button { font-size: 0.9rem; padding: 12px; }
+  .size-options { display: flex; flex-direction: column; gap: 10px; }
+  .size-options button { margin-right: 0; width: 100%; }
+  .feature-badges { flex-direction: column; gap: 10px; }
+  .feature-badges .feature { justify-content: center; min-width: 100%; }
+  .custom-calendar { max-width: 100%; }
+}
+
+/* Mobile Sticky CTA */
+    .sticky-cta {
+      position: fixed;
+      bottom: 12px;
+      left: 12px;
+      right: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: white;
+      padding: 10px 14px;
+      border-radius: 10px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+      z-index: 9999;
+    }
+    .sticky-cta .text {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--dark);
+      line-height: 1.3;
+      padding: 7px;
+    }
+    .sticky-cta a {
+      background: #25d366;
+      color: white;
+      padding: 10px 14px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 13px;
+      animation: pulse 2s infinite;
+    }
+    .sticky-cta a:hover { transform: scale(1.05); }
+
+    @media(min-width: 720px) {
+      .sticky-cta { display: none; }
+    }
+
+    /* Desktop Floating WhatsApp Button */
+    .whatsapp-desktop {
+      display: none;
+    }
+    @media(min-width: 720px) {
+      .whatsapp-desktop {
+        display: flex;
+        align-items: center;
+        position: fixed;
+        bottom: 25px;
+        right: 25px;
+        background: #25d366;
+        color: white;
+        border-radius: 50px;
+        text-decoration: none;
+        padding: 10px 18px;
+        font-weight: 600;
+        font-size: 15px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+        animation: pulse 2s infinite;
+        transition: all 0.3s ease;
+      }
+      .whatsapp-desktop:hover {
+        transform: scale(1.05);
+      }
+      .whatsapp-desktop svg {
+        width: 28px;
+        height: 28px;
+        margin-right: 8px;
+        fill: white;
+      }
+    }
+
+    /* reviews */
+    .rr-main{
+      display: flex;
+      justify-content: center;
+      align-items: center;
+     
+    }
+
+    .review-container {
+      max-width: 750px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .reviews {
+      display: flex;
+      transition: transform 0.5s ease-in-out;
+    }
+
+    .review {
+      flex: 0 0 100%;
+      text-align: center;
+      padding: 25px 15px;
+      background: #fff;
+      border-radius: 12px;
+      border: 2px dashed #254262;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    }
+
+    .review img {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      margin-bottom: 10px;
+    }
+
+    .stars {
+      display: flex;
+      justify-content: center;
+      margin: 8px 0;
+    }
+
+    .stars svg {
+      width: 22px;
+      height: 22px;
+      fill: #f7b500;
+      margin: 0 2px;
+    }
+
+    .review p {
+      font-size: 15px;
+      color: #444;
+      margin: 10px 0 8px;
+      line-height: 1.4;
+    }
+
+    .review .name {
+      font-weight: 600;
+      font-size: 16px;
+      margin-top: 5px;
+    }
+
+    .review .role {
+      font-size: 13px;
+      color: #777;
+    }
+
+    /* Dots Navigation */
+    .dots {
+      display: flex;
+      justify-content: center;
+      margin-top: 15px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #ccc;
+      margin: 0 4px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .dot.active {
+      background: #333;
+    }
+
+    @media (max-width: 500px) {
+      .review {
+        padding: 20px 10px;
+      }
+      .review p {
+        font-size: 14px;
+      }
+    }
+
+  .faq-section {
+    max-width: 750px;
+    margin: auto;
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    padding: 30px;
+    font-family: "Poppins", sans-serif;
+  }
+
+  .faq-section h2 {
+    text-align: center;
+    color: #254262;
+    margin-bottom: 25px;
+    font-size: 28px;
+  }
+
+  .faq {
+    border-bottom: 1px solid #ddd;
+    padding: 15px 0;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+
+  .faq:last-child {
+    border-bottom: none;
+  }
+
+  .faq-question {
+    font-weight: 600;
+    color: #4a6fa5;
+    position: relative;
+    padding-right: 25px;
+    font-size: 16px;
+  }
+
+  .faq-question::after {
+    content: '+';
+    position: absolute;
+    right: 0;
+    font-size: 20px;
+    color: #254262;
+    transition: transform 0.3s;
+  }
+
+  .faq.active .faq-question::after {
+    transform: rotate(45deg);
+  }
+
+  .faq-answer {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s ease, padding 0.5s ease;
+    padding: 0 0;
+    color: #333;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  .faq.active .faq-answer {
+    padding: 10px 0 0 0;
+    max-height: 200px; /* Adjust depending on content */
+  }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .faq-section h2 {
+      font-size: 24px;
+    }
+    .faq-question {
+      font-size: 15px;
+    }
+    .faq-answer {
+      font-size: 14px;
+    }
+  }
+
+  /* social media icon*/
+.social-media {
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    margin: 40px 0;
+  }
+
+  .social-icon {
+    width: 55px;
+    height: 55px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #4a6fa5;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 22px;
+    transition: all 0.3s ease;
+  }
+
+  .social-icon.instagram { background: #E1306C; }
+  .social-icon.facebook { background: #1877F2; }
+  .social-icon.youtube { background: #FF0000; }
+  .social-icon.whatsapp { background: #25D366; }
+
+  .social-icon:hover {
+    transform: scale(1.2);
+    opacity: 0.85;
+  }
+
+  @media (max-width: 600px) {
+    .social-media {
+      gap: 15px;
+    }
+    .social-icon {
+      width: 45px;
+      height: 45px;
+      font-size: 18px;
+    }
+  }
+
+  .footer {
+    background: linear-gradient(135deg, #254262, #4a6fa5);
+    color: #ffffff;
+    padding: 40px 20px;
+    text-align: center;
+    font-family: "Poppins", sans-serif;
+  }
+
+  .footer-content h2 {
+    margin: 0;
+    font-size: 28px;
+    color: #f5b301;
+    font-weight: 600;
+  }
+
+  .footer-content p {
+    margin: 10px 0;
+    font-size: 14px;
+    color: #d6e0f0;
+    line-height: 1.5;
+  }
+
+  .footer-bottom {
+    margin-top: 15px;
+    font-size: 13px;
+    opacity: 0.7;
+  }
+
+
+  .logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background-color: #254262;
+    }
+
+    .logo img {
+      height: 40px;
+      width: 40px;
+      object-fit: contain;
+    }
+
+    .logo h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: white;
+      white-space: nowrap;
+    }
+
+    /* ===== MOBILE & TABLET ===== */
+    @media (max-width: 991px) {
+
+      .logo img {
+        display: none;
+      }
+    }
+
+    /* ===== DESKTOP ===== */
+    @media (min-width: 992px) {
+      .logo h1 {
+        display: inline-block;
+      }
+    }
+
+    /* ===== Image Sliders ===== */
+     .slider {
+      position: relative;
+      width: 100%;
+      max-width: 750px;
+      margin: 0 auto;
+      overflow: hidden;
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .slides {
+      display: flex;
+      transition: transform 0.6s ease-in-out;
+    }
+
+    .slides img {
+      width: 100%;
+      flex-shrink: 0;
+      object-fit: cover;
+    }
+
+    .nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0, 0, 0, 0.4);
+      color: #fff;
+      padding: 10px;
+      cursor: pointer;
+      border-radius: 50%;
+      font-size: 18px;
+      user-select: none;
+      transition: background 0.3s;
+      z-index: 10;
+    }
+
+    .nav:hover {
+      background: rgba(0, 0, 0, 0.6);
+    }
+
+    .backBtn {
+      left: 10px;
+    }
+
+    .forwardBtn {
+      right: 10px;
+    }
+
+    .dotss {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 6px;
+      z-index: 10;
+    }
+
+    .dott {
+      width: 12px;
+      height: 12px;
+      background: rgba(255, 255, 255, 0.6);
+      border-radius: 50%;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .dott.active {
+      background: #fff;
+    }
+
+    @media (max-width: 600px) {
+      .nav {
+        padding: 6px;
+        font-size: 14px;
+      }
+      .dott {
+        width: 10px;
+        height: 10px;
+      }
+    }
+
+
+    /* Layout for desktop */
+  .desktop-layout {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+  }
+
+  .side-img {
+    width: 300px;
+    height: 300px;
+    object-fit: cover;
+    border-radius: 12px;
+  }
+
+  /* Center video box */
+  .video-box {
+    max-width: 500px;
+  }
+
+  .video-box video {
+    width: 100%;
+    border-radius: 30px;
+    object-fit: cover;
+  }
+
+  /* MOBILE + TABLET (hide images + fullscreen reels) */
+  @media (max-width: 1024px) {
+    .desktop-layout {
+      display: block;  /* Disable flex */
+    }
+
+    .side-img {
+      display: none;   /* Hide side images */
+    }
+
+    :root {
+      --vh: 1vh;
+    }
+
+    .video-box {
+      max-width: 100%;
+      margin: 0;
+    }
+
+    .video-box video {
+      width: 98vw;
+      height: calc(var(--vh) * 100);
+      object-fit: cover;
+      border-radius: 50px;
+    }
+  }
+
+</style>
 </head>
-<body class="p-4">
-  <div class="text-center mb-6">
-    <h1 class="text-3xl font-semibold text-gray-800">👜 Bagzzy 👜</h1>
-    <p class="text-gray-500 mt-1">Browse Quality Products </p>
+<body>
+
+<!-- Rotating Offer -->
+<div class="offer-header" id="offerHeader"></div>
+
+<div class="logo">
+      <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhPH2l-SGvI34Z6cRHExZlgVcirP8qzTYsZb4A_fpR67eMOmFvzhx1oH9uMuGtTiBd0GSu8ihNyUDrZFSo35QrYLOsVGxrB55NcoZJfsqAsV5f_dbBPNKZKcChrAwrqmZ4HDsA45PSPDz4wP6HthL-9Ym9eV-34kKM9mj1ZuFsr3zm4XaDbtTXEWEGMbTB3/s1600/Black_White_Modern_Letter_AG_Logo-removebg-preview.png" alt="Logo">
+      <h1>Artizo</h1>
+</div>
+
+<div class="container">
+  <div class="image-section">
+    <div class="thumbnails">
+      <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgfObkWidNc-I1-ID9u0DGprWRomn6MeOEn-5M32qc5ZuELKgrndZ9Eb77buykEMLIqrcCOxEGIB0RBwIfPR80KTfPGS-F6OYYDLmmuOWBTjPSjUYlTpThdqsFmIbw_CYndiyRmiMzcrr4Vd9Z3tFr6N7MxpwKU9bDgr8D1gqx4TMCwDe5RheP0OZhXfxB7/s1600/1st.webp" class="active" onclick="changeImage(this)">
+      <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjoDqeZpIzlg2jCsp0wH8EDFYWywCg_fc9I4Mtegi8S4ZGEq3xV0HO77WTHoaTsCbRXgBvo1hOcXNHfCvfPbFWxSuNLQGl7TGWingzsHUSvWmjSHg5_KFMPrv_Zp3RY4BHLdi7XWTaaQ9H79aMZjitx7Ewz5PtUKsfFWOdQBVGyIuF0oOTHs_5sy1HGrhE1/s1600/2nd.webp" onclick="changeImage(this)">
+      <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjTa3SZ8-fGngNBhYWts7YM8AQ9BAflpol9iHdpKzS34kt8mNmqvk2Qpf-hR0ewbFpprpMge-OnMXkrKutrRD_WkILDlvuPjF_m8IftjPKsapqiouF0bUJX6tM9MEnUXjEnlLb9C-gVsoWIYRIr6NqFTz0v6rw8AAxum0f4Px7R9Yr-EdSPyVGnspF2ivqw/s1600/3rd.webp" onclick="changeImage(this)">
+      <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgEkT5ScLCDwGc1rRe7JO-miGHYbaqmc-Ou_TKIrs7TQ5vKM9jrQANo0KZvWmWirckJW7_Prh6dLAEVDFNgb0h97dIjpiE9QW2QEaDEVv8jlpi7EI9Qy8NQ-waf8FdVFgY5upCjgPIvncV10VG46D9z9H7rdY_PRqAKkC2h5wS2VQBNXO1sq4Okf69E3ZRY/s1600/4th.webp" onclick="changeImage(this)">
+      <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgEkT5ScLCDwGc1rRe7JO-miGHYbaqmc-Ou_TKIrs7TQ5vKM9jrQANo0KZvWmWirckJW7_Prh6dLAEVDFNgb0h97dIjpiE9QW2QEaDEVv8jlpi7EI9Qy8NQ-waf8FdVFgY5upCjgPIvncV10VG46D9z9H7rdY_PRqAKkC2h5wS2VQBNXO1sq4Okf69E3ZRY/s1600/4th.webp" onclick="changeImage(this)">
+    </div>
+    <div class="main-image">
+    <button class="prev" onclick="prevImage()">❮</button>
+    <img id="mainProductImage" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjt3uWzVNSzmrNaiQIGOVl4KFOq1yRrcHAkmqAQHUG6sVFgjiLiAQ2hhGQVBwrqOVU1OPJARQWVquhuTQSCWXQjIgUdiXPJ_HX-Q8RjMNOV9QqZa_sXRQ9ZJ3nSlUaq2UmzaE9sOd9kbLpJMZbjCSmULPenYoPjYzAmMli2vE3CiaBHTLxoJtfUPvEdIpRk/s1600/5th.webp" alt="Product">
+    <button class="next" onclick="nextImage()">❯</button>
+  </div>
   </div>
 
-  <!-- Controls -->
-  <div class="controls">
-    <div class="flex items-center gap-2">
-      <label class="text-gray-600 text-sm">Max Price:</label>
-      <input id="maxPrice" type="number" placeholder="₹ 9999" class="border p-2 rounded w-28 focus:outline-none focus:ring focus:ring-blue-200">
+  <div class="details-section">
+    <div class="product-title">String Art Portrait for Gift: Threads of Identity</div>
+    <div class="rating">⭐⭐⭐⭐⭐ (108 reviews)</div>
+    <div class="price" id="price">
+      <span class="old-price" id="oldPrice">₹7,999</span>
+      <span id="currentPrice">₹4,999</span>
+      <span class="discount" id="discount">38% OFF</span>
     </div>
 
-    <button id="filterBtn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">Filter</button>
-    <button id="resetBtn" class="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400 transition">View All Products</button>
+    <!-- FEATURE BADGES -->
+    <div class="feature-badges">
+      <div class="feature">
+        <img src="https://img.icons8.com/?size=100&id=nVwrm2T2GkIP&format=png&color=000000" alt="Single Thread">
+        <span>Made Just From a Single Thread</span>
+      </div>
+      <div class="feature">
+        <img src="https://img.icons8.com/?size=100&id=BpYAYLNT5CPW&format=png&color=000000" alt="Ready to Hang">
+        <span>Ready to Hang</span>
+      </div>
+      <div class="feature">
+        <img src="https://img.icons8.com/color/48/000000/gift.png" alt="Single Thread">
+        <span>Perfect Gift</span>
+      </div>
+      <div class="feature">
+        <img src="https://img.icons8.com/color/48/000000/free-shipping.png" alt="Free Shipping">
+        <span>Free Shipping</span>
+      </div>
+    </div>
+
+    <!-- OPTIONS -->
+
+    <div class="option-group">
+      <div class="option-title">Select Portrait Size:</div>
+      <div class="size-options">
+        <button class="active" onclick="selectOption(this, 'size')">42 cm Diameter</button>
+        <button onclick="selectOption(this, 'size')">60 cm Diameter</button>
+        <button onclick="selectOption(this, 'size')">100 cm Diameter</button>
+      </div>
+    </div>
+
+    <!-- DELIVERY DATE -->
+    <div class="option-group delivery-date">
+      <div class="option-title">Select Tentative Delivery Date:</div>
+      <input type="text" id="deliveryInput" readonly placeholder="Select Date" style="padding:10px; border-radius:8px; border:2px solid #ccc; width:100%; cursor:pointer;">
+      <div class="custom-calendar" id="calendarContainer"></div>
+      <input type="hidden" id="deliveryDate">
+    </div>
+
+    <div class="actions">
+      <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgzSFcSifyvVw1ocGQZsNAQKX_oz7aHpiqBbbzY6HLEDkIJrr-p4LdEqiFHGBKh2CiG4W8JN2r-bdxigXL-8y-cPTBXWgoUhoexZ8j83K9Q2VDG-PDctkGkVzad7QLWzwKfZ6vmKJkbf2ngqZTJvKgDOXioVw7OOrWRES8lG7kUThPOHBhqKuPCCB7RHIg/s1600/safe.png" alt="safe checkout" style="width:100%">
+     <button class="personalize-btn" id="personalizeBtn">Personalize Now @ ₹<span id="btnPrice">4,999</span></button>
+    </div>
+
+    <div id="urgency-section" style="margin-top: 15px; font-size: 14px; color: #333;">
+      <p id="viewerCount" style="margin: 5px 0; font-weight: 500;">🔥 Loading viewers...</p>
+      <p id="soldCount" style="margin: 5px 0; font-weight: 500;">⏰ Loading sold data...</p>
+    </div>
+
+    <div class="extra-info">
+      <h3 onclick="toggleFAQ(this)">Description</h3>
+      <p>Handcrafted string art portrait made with precision, capturing faces with thousands of threads.This unique creation invites you to witness the fusion of artistic expression and meticulous craftsmanship, where every inch resonates with the spirit of handmade elegance.</p>
+      <h3 onclick="toggleFAQ(this)">Return & Refund</h3>
+      <p>All our products are handmade and personalised — which means we don’t accept returns or cancellations once the order is placed.However, if your item arrives damaged or incorrect, we’re happy to help!Just send us a clear unboxing video and photos within 24 hours of delivery.Without proper proof, we won’t be able to process a replacement.Thanks for supporting made-to-order, meaningful gifting!</p>
+    </div>
+  </div>
+</div>
+<br>
+
+<div style="max-width:750px;margin:15px auto;text-align:center;padding:1px;">
+
+  <b style="font-size:clamp(34px, 5vw, 34px); font-weight:900;">
+    <span style="color:#ffffff;-webkit-text-stroke: 1px #254262;">OUR</span>
+    <span style="color:#254262;">PORTFOLIO</span>
+  </b>
+
+    <p style="font-size:clamp(14px, 4vw, 17px);line-height:1.6;color:#555;margin-bottom:5px;">
+        We specialize in creating premium handcrafted designs with unmatched detailing and creativity
+    </p>
+
+</div>
+
+
+<!--Image Sliders-->
+
+<div class="slider">
+    <div class="slides">
+      <img src="https://picsum.photos/id/1015/800/400" alt="">
+      <img src="https://picsum.photos/id/1025/800/400" alt="">
+      <img src="https://picsum.photos/id/1035/800/400" alt="">
+      <img src="https://picsum.photos/id/1045/800/400" alt="">
+      <img src="https://picsum.photos/id/1015/800/400" alt="">
+      <img src="https://picsum.photos/id/1025/800/400" alt="">
+      <img src="https://picsum.photos/id/1035/800/400" alt="">
+      <img src="https://picsum.photos/id/1045/800/400" alt="">
+    </div>
+
+    <div class="nav backBtn">&#10094;</div>
+    <div class="nav forwardBtn">&#10095;</div>
+    <div class="dotss"></div>
+</div>
+
+<br><br>
+<div style="max-width:750px;margin:15px auto;text-align:center;padding:1px;">
+
+  <b style="font-size:clamp(34px, 5vw, 34px); font-weight:900;">
+    <span style="color:#ffffff;-webkit-text-stroke: 1px #254262;">LOVE</span>
+    <span style="color:#254262;">IN EVERY THREAD</span>
+  </b>
+
+    <p style="font-size:clamp(14px, 4vw, 17px);line-height:1.6;color:#555;margin-bottom:5px;">
+        A masterpiece born from emotion -  delicately woven, intentionally crafted, eternally cherished.
+    </p>
+
+</div>
+
+<!-- Video Autoplay Section-->
+<div class="desktop-layout">
+
+  <!-- LEFT IMAGE -->
+  <img src="C:\Users\UTSAV\OneDrive\Desktop\sap3.webp" class="side-img">
+
+  <!-- VIDEO CENTER -->
+  <div class="video-box">
+    <video autoplay muted loop playsinline>
+      <source src="https://raw.githubusercontent.com/UtsavBhai/lumora/main/artizo.mp4" type="video/mp4">
+    </video>
   </div>
 
-  <!-- Toast -->
-  <div id="toast">Please enter a valid maximum price.</div>
+  <!-- RIGHT IMAGE -->
+  <img src="C:\Users\UTSAV\OneDrive\Desktop\sap2.webp" class="side-img">
 
-  <!-- Product grid -->
-  <div id="productList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
+</div><br><br>
 
-  <!-- loader -->
-  <div id="loader" class="loader hidden"><div class="spinner"></div></div>
+<div style="max-width:750px;margin:15px auto;text-align:center;padding:1px;">
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
-    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-database.js";
+  <b style="font-size:clamp(34px, 5vw, 34px); font-weight:900;">
+    <span style="color:#ffffff;-webkit-text-stroke: 1px #254262;">CLIENT</span>
+    <span style="color:#254262;">LOVE</span>
+  </b>
 
-    // Firebase config
-    const firebaseConfig = {
-      apiKey: "AIzaSyCrROgrBCOLY5x5hT-gKeGHNxgkceDsHEY",
-      authDomain: "bizcard-66p40.firebaseapp.com",
-      databaseURL: "https://bizcard-66p40-default-rtdb.firebaseio.com",
-      projectId: "bizcard-66p40",
-      storageBucket: "bizcard-66p40.firebasestorage.app",
-      messagingSenderId: "674317792778",
-      appId: "1:674317792778:web:9900197569b2f7647dd1f3"
-    };
+    <p style="font-size:clamp(14px, 4vw, 17px);line-height:1.6;color:#555;margin-bottom:5px;">
+      Heartfelt words from our amazing clients.
+    </p>
 
-    // Init
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+</div>
 
-    // State
-    let products = [];
-    let filteredProducts = [];
-    let displayedCount = 0;
-    const itemsPerPage = 5;
-    let isFetching = false;
-
-    // DOM
-    const productList = document.getElementById('productList');
-    const loader = document.getElementById('loader');
-    const toast = document.getElementById('toast');
-    const filterBtn = document.getElementById('filterBtn');
-    const resetBtn = document.getElementById('resetBtn');
-    const maxInput = document.getElementById('maxPrice');
-
-    // Fetch products from Firebase
-    async function fetchProducts() {
-      showLoader(true);
-      try {
-        const snap = await get(ref(db, "products"));
-        if (snap.exists()) {
-          products = Object.values(snap.val());
-
-          // ✅ NEW: Show newest products first (reverse order)
-          products.reverse();
-        } else {
-          products = [];
-        }
-        filteredProducts = [...products];
-        resetDisplayAndShowNext();
-      } catch (err) {
-        console.error("Error fetching products:", err);
-        showToast("Failed to load products.");
-      } finally {
-        showLoader(false);
-      }
-    }
-
-    function showLoader(on) { loader.classList.toggle('hidden', !on); }
-
-    function resetDisplayAndShowNext() {
-      productList.innerHTML = "";
-      displayedCount = 0;
-      showNextProducts();
-    }
-
-    function showNextProducts() {
-      if (isFetching) return;
-      isFetching = true;
-      const start = displayedCount;
-      const end = Math.min(displayedCount + itemsPerPage, filteredProducts.length);
-      const batch = filteredProducts.slice(start, end);
-      batch.forEach(prod => createCard(prod));
-      displayedCount = end;
-      isFetching = false;
-
-      if (filteredProducts.length === 0) {
-        productList.innerHTML = `<p class='text-center text-gray-500 col-span-full'>No products found.</p>`;
-      }
-    }
-
-    function createCard(prod) {
-      const name = prod.productName || "Ladies Purses";
-      const price = Number(prod.price || 0);
-      const discountPrice = Number(prod.discountPrice ?? price);
-      const image = prod.image || "https://via.placeholder.com/400x300?text=No+Image";
-
-      const waNumber = "918347564798";
-      const msg = encodeURIComponent(`Hello, I'm interested in *${name}* priced at ₹${formatNumber(discountPrice)}.`);
-      const waUrl = `https://wa.me/${waNumber}?text=${msg}`;
-
-      const div = document.createElement('div');
-      div.className = "product-card bg-white rounded-xl shadow p-3 flex flex-col text-center";
-
-      div.innerHTML = `
-        <img src="${escapeHtml(image)}" alt="${escapeHtml(name)}">
-        <div class="mt-3 flex-grow">
-          <h2 class="font-semibold text-gray-800 text-lg">${escapeHtml(name)}</h2>
-          <div class="mt-2">
-            <p style="color:#1d6738;"class="text-green-600 text-xl font-bold">₹${formatNumber(discountPrice)}</p>
-          </div>
+<!-- Reviews Section-->
+ <div class="rr-main">
+<div class="review-container">
+    <div class="reviews">
+      <!-- 12+ REVIEWS HERE -->
+      <div class="review">
+        <img src="https://i.pravatar.cc/100?img=1" alt="User 1">
+        <div class="stars">
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
         </div>
-        <a class="wa-btn mt-3" href="${waUrl}" target="_blank" rel="noopener">
-          <img class="wa-icon" src="https://cdn-icons-png.flaticon.com/512/733/733585.png" alt="wa">
-          <span>WhatsApp Now</span>
-        </a>
-      `;
-      productList.appendChild(div);
-    }
+        <p>“Absolutely amazing service! The quality exceeded my expectations.”</p>
+        <div class="name">Rahul Sharma</div>
+        <div class="role">Verified Customer</div>
+      </div>
 
-    // Helpers
-    function showToast(message) {
-      toast.textContent = message;
-      toast.classList.add('show');
-      setTimeout(() => toast.classList.remove('show'), 2800);
-    }
-    function formatNumber(n){ return Number(n).toLocaleString('en-IN'); }
-    function escapeHtml(str){ return String(str).replace(/[&<>"']/g, (m)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[m])); }
+      <div class="review">
+        <img src="https://i.pravatar.cc/100?img=2" alt="User 2">
+        <div class="stars">
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+        </div>
+        <p>“Super fast delivery and the support team was very helpful.”</p>
+        <div class="name">Priya Mehta</div>
+        <div class="role">Customer</div>
+      </div>
 
-    function applyFilter() {
-      const raw = maxInput.value.trim();
-      if (!raw) {
-        showToast("⚠️ Enter maximum price or press Reset.");
-        return;
-      }
-      const max = Number(raw);
-      if (isNaN(max) || max <= 0) {
-        showToast("⚠️ Enter a valid maximum price (> 0).");
-        return;
-      }
+      <div class="review">
+        <img src="https://i.pravatar.cc/100?img=3" alt="User 3">
+        <div class="stars">
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+        </div>
+        <p>“Great experience overall. Will definitely order again.”</p>
+        <div class="name">Neha K.</div>
+        <div class="role">Regular Buyer</div>
+      </div>
 
-      filteredProducts = products.filter(p => {
-        const effective = Number(p.discountPrice ?? p.price ?? 0);
-        return effective <= max;
-      });
+      <div class="review">
+        <img src="https://i.pravatar.cc/100?img=2" alt="User 2">
+        <div class="stars">
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+        </div>
+        <p>“Super fast delivery and the support team was very helpful.”</p>
+        <div class="name">Priya Mehta</div>
+        <div class="role">Customer</div>
+      </div>
 
-      resetDisplayAndShowNext();
-    }
+       <div class="review">
+        <img src="https://i.pravatar.cc/100?img=2" alt="User 2">
+        <div class="stars">
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+        </div>
+        <p>“Super fast delivery and the support team was very helpful.”</p>
+        <div class="name">Priya Mehta</div>
+        <div class="role">Customer</div>
+      </div>
 
-    function resetFilter() {
-      maxInput.value = "";
-      filteredProducts = [...products];
-      resetDisplayAndShowNext();
-    }
+       <div class="review">
+        <img src="https://i.pravatar.cc/100?img=2" alt="User 2">
+        <div class="stars">
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+        </div>
+        <p>“Super fast delivery and the support team was very helpful.”</p>
+        <div class="name">Priya Mehta</div>
+        <div class="role">Customer</div>
+      </div>
 
-    window.addEventListener('scroll', () => {
-      if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 120) {
-        if (displayedCount < filteredProducts.length) {
-          showLoader(true);
-          setTimeout(() => {
-            showNextProducts();
-            showLoader(false);
-          }, 300);
-        }
-      }
+       <div class="review">
+        <img src="https://i.pravatar.cc/100?img=2" alt="User 2">
+        <div class="stars">
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+        </div>
+        <p>“Super fast delivery and the support team was very helpful.”</p>
+        <div class="name">Priya Mehta</div>
+        <div class="role">Customer</div>
+      </div>
+
+       <div class="review">
+        <img src="https://i.pravatar.cc/100?img=2" alt="User 2">
+        <div class="stars">
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+        </div>
+        <p>“Super fast delivery and the support team was very helpful.”</p>
+        <div class="name">Priya Mehta</div>
+        <div class="role">Customer</div>
+      </div>
+
+       <div class="review">
+        <img src="https://i.pravatar.cc/100?img=2" alt="User 2">
+        <div class="stars">
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+        </div>
+        <p>“Super fast delivery and the support team was very helpful.”</p>
+        <div class="name">Priya Mehta</div>
+        <div class="role">Customer</div>
+      </div>
+
+       <div class="review">
+        <img src="https://i.pravatar.cc/100?img=2" alt="User 2">
+        <div class="stars">
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+        </div>
+        <p>“Super fast delivery and the support team was very helpful.”</p>
+        <div class="name">Priya Mehta</div>
+        <div class="role">Customer</div>
+      </div>
+
+       <div class="review">
+        <img src="https://i.pravatar.cc/100?img=2" alt="User 2">
+        <div class="stars">
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+        </div>
+        <p>“Super fast delivery and the support team was very helpful.”</p>
+        <div class="name">Priya Mehta</div>
+        <div class="role">Customer</div>
+      </div>
+
+       <div class="review">
+        <img src="https://i.pravatar.cc/100?img=2" alt="User 2">
+        <div class="stars">
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+        </div>
+        <p>“Super fast delivery and the support team was very helpful.”</p>
+        <div class="name">Priya Mehta</div>
+        <div class="role">Customer</div>
+      </div>
+
+       <div class="review">
+        <img src="https://i.pravatar.cc/100?img=2" alt="User 2">
+        <div class="stars">
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+        </div>
+        <p>“Super fast delivery and the support team was very helpful.”</p>
+        <div class="name">Priya Mehta</div>
+        <div class="role">Customer</div>
+      </div>
+
+       <div class="review">
+        <img src="https://i.pravatar.cc/100?img=3" alt="User 3">
+        <div class="stars">
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+        </div>
+        <p>“Great experience overall. Will definitely order again.”</p>
+        <div class="name">Neha K.</div>
+        <div class="role">Regular Buyer</div>
+      </div>
+
+      <div class="review">
+        <img src="https://i.pravatar.cc/100?img=2" alt="User 2">
+        <div class="stars">
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+        </div>
+        <p>“Super fast delivery and the support team was very helpful.”</p>
+        <div class="name">Priya Mehta</div>
+        <div class="role">Customer</div>
+      </div>
+
+      <div class="review">
+        <img src="https://i.pravatar.cc/100?img=2" alt="User 2">
+        <div class="stars">
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568..."/></svg>
+        </div>
+        <p>“Super fast delivery and the support team was very helpful.”</p>
+        <div class="name">Priya Mehta</div>
+        <div class="role">Customer</div>
+      </div>
+    </div>
+
+    <!-- Dots will be auto-generated for Review  -->
+    <div class="dots"></div>
+  </div>
+</div>
+<br><br>
+
+<!--Frequently Asked Questions -->
+<div class="faq-section">
+  <h2>Frequently Asked Questions</h2>
+
+  <div class="faq">
+    <div class="faq-question">What is your return policy?</div>
+    <div class="faq-answer">Each of our Thread Art Portraits is handcrafted and personalized just for you — which means we’re unable to accept returns or cancellations once the order is placed.However, if your portrait arrives damaged or incorrect, don’t worry — we’ve got you covered! Simply share a clear unboxing video and photos within 24 hours of delivery, and we’ll arrange a replacement.</div>
+  </div>
+
+  <div class="faq">
+    <div class="faq-question">How long does delivery take?</div>
+    <div class="faq-answer">We start creating your portrait right after you place your order.Delivery usually takes 7–10 days depending on your location and order volume.We’ll keep you updated every step of the way!</div>
+  </div>
+
+  <div class="faq">
+    <div class="faq-question">Do you offer international shipping?</div>
+    <div class="faq-answer">Yes! We ship worldwide so you can send love through art — no matter where you are.</div>
+  </div>
+
+  <div class="faq">
+    <div class="faq-question">Can I track my order?</div>
+    <div class="faq-answer">Absolutely! Once your order is shipped, you will receive a tracking number via WhatsApp or email.</div>
+  </div>
+
+  <div class="faq">
+    <div class="faq-question">Is shipping free within India?</div>
+    <div class="faq-answer">Yes, shipping is 100% free across India! No hidden charges — just beautiful handmade art delivered straight to your door.</div>
+  </div>
+</div>
+
+<!-- Social Media Section -->
+<div class="social-media">
+  <a href="https://www.instagram.com/" target="_blank" class="social-icon instagram" title="Instagram">
+    <i class="fab fa-instagram"></i>
+  </a>
+
+  <a href="https://www.facebook.com/" target="_blank" class="social-icon facebook" title="Facebook">
+    <i class="fab fa-facebook-f"></i>
+  </a>
+
+  <a href="https://www.youtube.com/" target="_blank" class="social-icon youtube" title="YouTube">
+    <i class="fab fa-youtube"></i>
+  </a>
+
+  <a href="https://wa.me/1234567890" target="_blank" class="social-icon whatsapp" title="WhatsApp">
+    <i class="fab fa-whatsapp"></i>
+  </a>
+</div>
+
+<!--Footer section-->
+<footer class="footer">
+  <div class="footer-content">
+    <h2>Artizo ~ Thread Art Portrait</h2>
+    <p>Handcrafted thread art portraits bringing your memories to life</p>
+    <p class="footer-bottom">© 2025 Thread Art Portrait. Created by UttamMarketing</p>
+  </div>
+</footer>
+
+ <!-- Mobile Sticky CTA -->
+  <div class="sticky-cta">
+  <div class="text">
+    🧵 <strong>String Art Portrait</strong><br>
+    <span id="urgency-text" style="color:red;">🎁 Special Offer</span>
+  </div>
+    <a href="https://wa.me/919824917935?text=Hi%20Stringora%2C%20I%20want%20to%20order%20a%20custom%20String%20Art%20Portrait.%20Please%20help%20me%20with%20the%20details." target="_blank">WhatsApp</a>
+  </div>
+
+  <!-- Desktop Floating WhatsApp -->
+  <a href="https://wa.me/919824917935?text=Hi%20Stringora%2C%20I%20want%20to%20order%20a%20custom%20String%20Art%20Portrait.%20Please%20help%20me%20with%20the%20details." target="_blank" class="whatsapp-desktop" aria-label="Chat on WhatsApp">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" style="height: 30px;width:30px" alt="WhatsApp Chat">&nbsp;Chat with us
+  </a>
+
+
+
+
+<script>
+// Base Prices
+const basePrices = {
+  'Single Face': { '42 cm Diameter': 4999, '60 cm Diameter': 6999, '100 cm Diameter': 12999 },
+  'Double Face': { '42 cm Diameter': 7999, '60 cm Diameter': 9999, '100 cm Diameter': 14999 }
+};
+let selectedImageType = 'Single Face';
+let selectedSize = '42 cm Diameter';
+
+function changeImage(el){
+  document.getElementById('mainProductImage').src = el.src;
+  document.querySelectorAll('.thumbnails img').forEach(img => img.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function selectOption(button, group){
+  button.parentNode.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
+  button.classList.add('active');
+  if(group==='image-type') selectedImageType = button.innerText;
+  if(group==='size') selectedSize = button.innerText;
+  updatePrice();
+}
+
+function updatePrice(){
+  const current = basePrices[selectedImageType][selectedSize];
+  const old = Math.ceil(current * 1.6);
+  const discount = Math.round(((old - current)/old)*100);
+  document.getElementById('currentPrice').innerText='₹'+current.toLocaleString();
+  document.getElementById('oldPrice').innerText='₹'+old.toLocaleString();
+  document.getElementById('discount').innerText=discount+'% OFF';
+}
+
+// FAQ
+function toggleFAQ(el){
+  el.classList.toggle('active');
+  const content = el.nextElementSibling;
+  content.style.display = content.style.display==='block'?'none':'block';
+}
+
+// Rotating Offers
+const offers=["50% OFF Today!","Free Delivery on this order!","Only ₹4999 Today!","Buy Now & Save Big!","Limited Time Offer!"];
+const offerHeader=document.getElementById("offerHeader");
+function showRandomOffer(){ offerHeader.innerText = offers[Math.floor(Math.random()*offers.length)]; }
+showRandomOffer();
+setInterval(showRandomOffer,3000);
+
+// CUSTOM CALENDAR
+const calendarContainer = document.getElementById("calendarContainer");
+const deliveryInput = document.getElementById("deliveryInput");
+const hiddenDelivery = document.getElementById("deliveryDate");
+const today = new Date();
+let currentMonth = today.getMonth();
+let currentYear = today.getFullYear();
+const minDeliveryDate = new Date(today); minDeliveryDate.setDate(today.getDate()+7);
+
+// Default 7-day-after date
+deliveryInput.value = minDeliveryDate.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+hiddenDelivery.value = minDeliveryDate.toISOString().split('T')[0];
+
+function renderCalendar(month, year){
+  calendarContainer.innerHTML="";
+  const header=document.createElement("div"); header.className="calendar-header";
+  const prevBtn=document.createElement("button"); prevBtn.innerText="<"; prevBtn.onclick=()=>changeMonth(-1);
+  const nextBtn=document.createElement("button"); nextBtn.innerText=">"; nextBtn.onclick=()=>changeMonth(1);
+  const monthYear=document.createElement("div"); const monthNames=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  monthYear.innerText=monthNames[month]+" "+year;
+  header.appendChild(prevBtn); header.appendChild(monthYear); header.appendChild(nextBtn); calendarContainer.appendChild(header);
+
+  const grid=document.createElement("div"); grid.className="calendar-grid";
+  const weekdays=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  weekdays.forEach(day=>{const d=document.createElement("div"); d.innerText=day; d.style.fontWeight="600"; grid.appendChild(d);});
+
+  const firstDay=new Date(year, month,1).getDay();
+  const daysInMonth=new Date(year,month+1,0).getDate();
+  for(let i=0;i<firstDay;i++){ const blank=document.createElement("div"); grid.appendChild(blank); }
+  for(let d=1;d<=daysInMonth;d++){
+    const dayDiv=document.createElement("div"); dayDiv.className="day"; dayDiv.innerText=d;
+    const dateObj=new Date(year,month,d);
+    if(dateObj<minDeliveryDate) dayDiv.classList.add("disabled");
+    else dayDiv.onclick=()=>{
+      selectDate(dayDiv,dateObj);
+      calendarContainer.style.display="none";
+    };
+    grid.appendChild(dayDiv);
+  }
+  calendarContainer.appendChild(grid);
+}
+
+function selectDate(el,dateObj){
+  calendarContainer.querySelectorAll(".day").forEach(d=>d.classList.remove("selected"));
+  el.classList.add("selected");
+  deliveryInput.value = dateObj.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+  hiddenDelivery.value = dateObj.toISOString().split('T')[0];
+}
+
+function changeMonth(dir){
+  currentMonth+=dir;
+  if(currentMonth>11){ currentMonth=0; currentYear++; }
+  if(currentMonth<0){ currentMonth=11; currentYear--; }
+  renderCalendar(currentMonth,currentYear);
+}
+
+deliveryInput.addEventListener('click',()=>{
+  calendarContainer.style.display = calendarContainer.style.display==='block'?'none':'block';
+  renderCalendar(currentMonth,currentYear);
+});
+
+updatePrice();
+</script>
+
+<script>
+  // Update button price dynamically
+  function updateButtonPrice() {
+    const currentPrice = basePrices[selectedImageType][selectedSize];
+    document.getElementById('btnPrice').innerText = currentPrice.toLocaleString();
+  }
+
+  // Call this whenever price updates
+  updatePrice = () => {
+    const current = basePrices[selectedImageType][selectedSize];
+    const old = Math.ceil(current * 1.6);
+    const discount = Math.round(((old - current) / old) * 100);
+
+    document.getElementById('currentPrice').innerText = '₹' + current.toLocaleString();
+    document.getElementById('oldPrice').innerText = '₹' + old.toLocaleString();
+    document.getElementById('discount').innerText = discount + '% OFF';
+
+    updateButtonPrice();
+  };
+</script>
+
+<script>
+  const sizeCode = {
+    "42 cm Diameter": "42",
+    "60 cm Diameter": "60",
+    "100 cm Diameter": "100"
+  };
+
+  document.getElementById('personalizeBtn').addEventListener('click', () => {
+    const sizeShort = sizeCode[selectedSize];
+    const date = document.getElementById('deliveryDate').value; // YYYY-MM-DD
+    const dateShort = date.replace(/-/g, ""); // 20251017 format
+
+    const message = `Hi, I want to order a Personalized Thread Art Portrait.%0ASize: ${sizeShort}cm%0ADate: ${date}`;
+
+    // WhatsApp URL
+    const phone = "9824917935"; // your WhatsApp number
+    const whatsappUrl = `https://wa.me/919824917935?text=${message}`;
+
+    // Open WhatsApp
+    window.open(whatsappUrl, "_blank");
+  });
+</script>
+
+<script>
+  // Array of random urgency messages
+  const messages = [
+    "🎁 Only 5 Left @ ₹4999",
+    "🔥 Only Today 50% OFF",
+    "🚨 Hurry! Offer Ending Soon",
+    "⏰ Limited Stock ~ ₹4999",
+    "💥 Flash Deal ~ ₹4999 Only",
+    "🎨 Last Few Slots Left @ ₹4999"
+  ];
+
+  // Pick a random message
+  const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+
+  // Update the span text
+  document.getElementById("urgency-text").textContent = randomMessage;
+</script>
+
+<script>
+    const reviews = document.querySelector('.reviews');
+    const reviewItems = document.querySelectorAll('.review');
+    const dotsContainer = document.querySelector('.dots');
+    let currentIndex = 0;
+
+    // Create dots dynamically
+    reviewItems.forEach((_, i) => {
+      const dot = document.createElement('div');
+      dot.classList.add('dot');
+      if (i === 0) dot.classList.add('active');
+      dot.addEventListener('click', () => goToReview(i));
+      dotsContainer.appendChild(dot);
     });
 
-    filterBtn.addEventListener('click', applyFilter);
-    resetBtn.addEventListener('click', resetFilter);
-    maxInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') applyFilter(); });
+    const dots = document.querySelectorAll('.dot');
 
-    fetchProducts();
+    function goToReview(index) {
+      currentIndex = index;
+      reviews.style.transform = `translateX(-${index * 100}%)`;
+      dots.forEach(dot => dot.classList.remove('active'));
+      dots[index].classList.add('active');
+    }
+
+    // Auto-slide every 4 seconds
+    setInterval(() => {
+      currentIndex = (currentIndex + 1) % reviewItems.length;
+      goToReview(currentIndex);
+    }, 4000);
   </script>
+
+<script>
+  const faqs = document.querySelectorAll('.faq');
+
+  faqs.forEach(faq => {
+    faq.addEventListener('click', () => {
+      faq.classList.toggle('active');
+    });
+  });
+</script>
+
+<script>
+  const thumbnails = document.querySelectorAll('.thumbnails img');
+  const mainImage = document.getElementById('mainProductImage');
+  let currenttIndex = 0;
+
+  function changeImage(img) {
+    thumbnails.forEach(t => t.classList.remove('active'));
+    img.classList.add('active');
+    mainImage.src = img.src;
+    currenttIndex = Array.from(thumbnails).indexOf(img);
+  }
+
+  function prevImage() {
+    currenttIndex = (currenttIndex - 1 + thumbnails.length) % thumbnails.length;
+    changeImage(thumbnails[currenttIndex]);
+  }
+
+  function nextImage() {
+    currenttIndex = (currenttIndex + 1) % thumbnails.length;
+    changeImage(thumbnails[currenttIndex]);
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    changeImage(thumbnails[0]); // show first image on load
+  });
+</script>
+
+<script>
+  let currentViewers = Math.floor(Math.random() * (150 - 25 + 1)) + 25; // 25-150 initial
+
+  function updateViewerCount() {
+    // Organic fluctuation (-5 to +5)
+    const change = Math.floor(Math.random() * 11) - 5;
+    let newViewers = currentViewers + change;
+
+    // Clamp between 25 and 150
+    if (newViewers < 25) newViewers = 25;
+    if (newViewers > 150) newViewers = 150;
+
+    currentViewers = newViewers;
+    document.getElementById('viewerCount').innerText = `🔥 ${currentViewers} people are viewing this right now`;
+  }
+
+  updateViewerCount();
+  setInterval(updateViewerCount, 3000);
+  const SOLD_KEY = 'soldCounterData';
+
+  function getSoldData() {
+    const saved = localStorage.getItem(SOLD_KEY);
+    if (saved) {
+      const data = JSON.parse(saved);
+      const now = Date.now();
+      
+      if (now - data.timestamp < 8 * 60 * 60 * 1000) {
+        return data;
+      }
+    }
+    const sold = Math.floor(Math.random() * 100) + 1; 
+    const hours = Math.floor(Math.random() * 15) + 1; 
+    const newData = { sold, hours, timestamp: Date.now() };
+    localStorage.setItem(SOLD_KEY, JSON.stringify(newData));
+    return newData;
+  }
+
+  function updateSoldCount() {
+    const data = getSoldData();
+    document.getElementById('soldCount').innerText = `⏰ ${data.sold} sold in last ${data.hours} hours`;
+  }
+
+  updateSoldCount();
+</script>
+
+
+<script>
+    const slides = document.querySelector('.slides');
+    const images = document.querySelectorAll('.slides img');
+
+    const backBtn = document.querySelector('.backBtn');
+    const forwardBtn = document.querySelector('.forwardBtn');
+
+    const dotsContainerr = document.querySelector('.dotss');
+
+    let activeSlide = 0;   // renamed
+    const totalSlides = images.length;
+
+    let autoSlide;
+
+    // Create dots
+    for (let i = 0; i < totalSlides; i++) {
+      const d = document.createElement('div');
+      d.classList.add('dott');
+      if (i === 0) d.classList.add('active');
+      d.addEventListener('click', () => goToSlide(i));
+      dotsContainerr.appendChild(d);
+    }
+
+    const dotss = document.querySelectorAll('.dott');
+
+    function showSlide(index) {
+      slides.style.transform = `translateX(-${index * 100}%)`;
+
+      dotss.forEach(dot => dot.classList.remove('active'));
+      dotss[index].classList.add('active');
+    }
+
+    function nextSlide() {
+      activeSlide = (activeSlide + 1) % totalSlides;
+      showSlide(activeSlide);
+    }
+
+    function prevSlide() {
+      activeSlide = (activeSlide - 1 + totalSlides) % totalSlides;
+      showSlide(activeSlide);
+    }
+
+    function goToSlide(index) {
+      activeSlide = index;
+      showSlide(activeSlide);
+      resetAutoSlide();
+    }
+
+    function startAutoSlide() {
+      autoSlide = setInterval(nextSlide, 3000);
+    }
+
+    function resetAutoSlide() {
+      clearInterval(autoSlide);
+      startAutoSlide();
+    }
+
+    forwardBtn.addEventListener('click', () => {
+      nextSlide();
+      resetAutoSlide();
+    });
+
+    backBtn.addEventListener('click', () => {
+      prevSlide();
+      resetAutoSlide();
+    });
+
+    startAutoSlide();
+</script>
+
+<script>
+  /* TRUE fullscreen for mobile/tablet */
+  function setVH() {
+    document.documentElement.style.setProperty('--vh', (window.innerHeight * 0.01) + "px");
+  }
+  setVH();
+  window.addEventListener("resize", setVH);
+</script>
+
 </body>
 </html>
